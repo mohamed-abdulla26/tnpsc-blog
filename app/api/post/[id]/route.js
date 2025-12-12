@@ -55,7 +55,7 @@ export async function GET(req, { params }) {
 
     // ⭐ REQUIRED: populate CTA (VERY IMPORTANT)
     const post = await PostModel.findById(params.id)
-      .populate("cta")   // <-- THIS MAKES CTA FULL OBJECT
+      .populate("cta")   // <-- THIS MAKES CTA FULL OBJECT.
       .exec();
 
     if (!post)
