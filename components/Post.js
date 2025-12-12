@@ -173,33 +173,20 @@ export default function Post({ post, posts = [] }) {
             onError={(e) => (e.currentTarget.src = "/images/default.jpg")}
           />
 
-          {/* CTA BUTTON #1 */}
-          {post.cta?._id && (
+          <button>{post.cta.text}</button>
 
-            <button
-              onClick={() => setShowModal(true)}
-              className="mb-6 px-6 py-3 bg-purple-700 text-white rounded-lg shadow hover:bg-purple-800"
-            >
-              {post.cta.text}
-            </button>
-          )}
 
+           
           <div
             className="prose prose-lg max-w-none"
             dangerouslySetInnerHTML={{ __html: post.description }}
           ></div>
 
           {/* CTA BUTTON #2 */}
-          {post.cta?._id && (
+          <button>{post.cta.text}</button>
 
-            <button
-              onClick={() => setShowModal(true)}
-              className="mt-6 px-6 py-3 bg-purple-700 text-white rounded-lg shadow hover:bg-purple-800"
-            >
-              {post.cta.text}
-            </button>
-          )}
-        </div>
+
+  </div>
 
         {/* RIGHT SIDEBAR */}
         <aside className="space-y-8">

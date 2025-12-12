@@ -1,52 +1,85 @@
-import { Schema, model, models } from "mongoose"; 
+// import { Schema, model, models } from "mongoose"; 
 
 
 
-const postSchema =  new Schema({
+// const postSchema =  new Schema({
+//     title: String,
+//     description: String,
+//     image: String,
+
+
+    
+    
+//     created_at:{
+//         type: Date,
+//         default: Date.now
+//     }
+// }, { toJSON: { virtuals: true} });
+
+// postSchema.virtual('short_description').get(function() {
+//     return this.description.substr(0,100)+'...'
+// });
+// postSchema.virtual('created_at_formatted').get(function() {
+//     return changeDateFormat(this.created_at)
+
+// });
+
+// function changeDateFormat(date_str) {
+//     const date = new Date(date_str);
+//     const months = ["January", "February", "March", "April", "May", "June",
+//     "July", "August", "September", "October", "November", "December"
+//     ];
+
+//     return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+// }
+
+
+// const PostModel = models.Post || model('Post', postSchema);
+
+// export default PostModel;
+
+
+
+
+
+
+
+import { Schema, model, models } from "mongoose";
+
+const postSchema = new Schema(
+  {
     title: String,
     description: String,
     image: String,
 
-
     cta: {
-    type: Schema.Types.ObjectId,
-    ref: "Cta",
+      type: Schema.Types.ObjectId,
+      ref: "Cta",
     },
-    
-    created_at:{
-        type: Date,
-        default: Date.now
+
+    created_at: {
+      type: Date,
+      default: Date.now,
     }
-}, { toJSON: { virtuals: true} });
+  },
+  { toJSON: { virtuals: true } }
+);
 
-postSchema.virtual('short_description').get(function() {
-    return this.description.substr(0,100)+'...'
-});
-postSchema.virtual('created_at_formatted').get(function() {
-    return changeDateFormat(this.created_at)
-
+postSchema.virtual("short_description").get(function () {
+  return this.description?.substring(0, 100) + "...";
 });
 
-function changeDateFormat(date_str) {
-    const date = new Date(date_str);
-    const months = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-    ];
+postSchema.virtual("created_at_formatted").get(function () {
+  const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+  const d = this.created_at;
+  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+});
 
-    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
-}
-
-
-const PostModel = models.Post || model('Post', postSchema);
-
+const PostModel = models.Post || model("Post", postSchema);
 export default PostModel;
-
-
-
-
-
-
-
 
 
 

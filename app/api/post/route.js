@@ -44,14 +44,51 @@
 // }
 
 
+// import connectMongo from "@/utils/connectMongo";
+// import PostModel from "@/models/postModel";
+// import { NextResponse } from "next/server";
+
+// export async function POST(req) {
+//   try {
+//     await connectMongo();
+//     const { title, description, image, cta } = await req.json();
+
+//     const finalImage = image?.trim() !== "" ? image : "default.jpg";
+
+//     const newPost = await PostModel.create({
+//       title,
+//       description,
+//       image: finalImage,
+//       cta: cta
+
+//     });
+
+//     return NextResponse.json({ success: true, post: newPost.toObject() });
+
+//   } catch (err) {
+//     return NextResponse.json({ success: false, message: err.message });
+//   }
+// }
+
+
 import connectMongo from "@/utils/connectMongo";
 import PostModel from "@/models/postModel";
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 
 export async function POST(req) {
   try {
     await connectMongo();
-    const { title, description, image, cta } = await req.json();
+    const body = await req.json();
+
+    const { title, description, image, cta } = body;
+
+    if (!title || !description) {
+      return NextResponse.json(
+        { success: false, message: "Title and description are required" },
+        { status: 400 }
+      );
+    }
 
     const finalImage = image?.trim() !== "" ? image : "default.jpg";
 
@@ -59,18 +96,23 @@ export async function POST(req) {
       title,
       description,
       image: finalImage,
-      cta: cta
 
+      // ✅ SAVE CTA AS ObjectId
+      cta: cta ? new mongoose.Types.ObjectId(cta) : null
     });
 
-    return NextResponse.json({ success: true, post: newPost.toObject() });
+    return NextResponse.json({
+      success: true,
+      post: newPost.toObject(),
+    });
 
-  } catch (err) {
-    return NextResponse.json({ success: false, message: err.message });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
   }
 }
-
-
 
 
 
