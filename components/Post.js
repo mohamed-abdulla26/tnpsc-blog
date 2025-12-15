@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function Post({ post, relatedPosts = [] }) {
+  const [submitted, setSubmitted] = useState(false);
+  const [actionText, setActionText] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [errors, setErrors] = useState({});
@@ -58,15 +60,13 @@ export default function Post({ post, relatedPosts = [] }) {
 
 
 
+
   const handleCtaSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
-
-
     try {
-      // 2️⃣ Save enquiry FIRST
       const res = await fetch("/api/enquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,33 +78,34 @@ export default function Post({ post, relatedPosts = [] }) {
         }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
         alert("Enquiry submit failed");
         return;
       }
 
-      // 3️⃣ NOW run CTA action
       const { actionType, actionValue } = post.cta;
 
+      // ✅ ONLY THIS LOGIC IS NEW
       if (actionType === "text") {
-        alert(actionValue);
-      }
+        setActionText(actionValue);
+        setSubmitted(true);
+        // ✅ reset form
+        setForm({ name: "", email: "", phone: "" });
+        setErrors({});
+      }   // hide form, show text
+
 
       if (actionType === "url") {
-        window.open(actionValue, "_blank");
+        window.open(actionValue, "_blank"); // new tab
+        setShowModal(false);                // close modal
       }
-
-      // 4️⃣ Reset + close modal
-      setForm({ name: "", email: "", phone: "" });
-      setShowModal(false);
 
     } catch (error) {
       console.error(error);
       alert("Something went wrong");
     }
   };
+
 
 
   return (
@@ -159,15 +160,24 @@ export default function Post({ post, relatedPosts = [] }) {
             onError={(e) => (e.currentTarget.src = "/images/default.jpg")}
           />
 
-          {/* CTA BELOW IMAGE */}
+
           {post.cta && (
             <div className="my-6 text-center">
+
+
               <button
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setShowModal(true);
+                  setSubmitted(false);
+                  setActionText("");
+                  setForm({ name: "", email: "", phone: "" }); // ✅
+                  setErrors({}); // ✅
+                }}
                 className="px-6 py-3 bg-purple-700 text-white rounded-lg font-medium hover:bg-purple-800"
               >
                 {post.cta.text}
               </button>
+
             </div>
           )}
 
@@ -180,12 +190,20 @@ export default function Post({ post, relatedPosts = [] }) {
           {/* CTA END OF CONTENT */}
           {post.cta && (
             <div className="my-8 text-center">
+
               <button
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setShowModal(true);
+                  setSubmitted(false);
+                  setActionText("");
+                  setForm({ name: "", email: "", phone: "" }); // ✅
+                  setErrors({}); // ✅
+                }}
                 className="px-6 py-3 bg-purple-700 text-white rounded-lg font-medium hover:bg-purple-800"
               >
                 {post.cta.text}
               </button>
+
             </div>
           )}
         </article>
@@ -237,52 +255,65 @@ export default function Post({ post, relatedPosts = [] }) {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">{post.cta.text}</h2>
+            {!submitted ? (
+              <>
+                <h2 className="text-xl font-bold mb-4">{post.cta.text}</h2>
 
-            <form onSubmit={handleCtaSubmit} className="space-y-4">
+                <form onSubmit={handleCtaSubmit} className="space-y-4">
+                  <input
+                    className="w-full border p-2 rounded"
+                    placeholder="Name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                  {errors.name && <p className="text-red-600 text-sm">{errors.name}</p>}
 
+                  <input
+                    className="w-full border p-2 rounded"
+                    placeholder="Email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                  {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
 
-              <input
-                className="w-full border p-2 rounded"
-                placeholder="Name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-              {errors.name && <p className="text-red-600 text-sm">{errors.name}</p>}
+                  <input
+                    className="w-full border p-2 rounded"
+                    placeholder="Phone"
+                    value={form.phone}
+                    maxLength={10}
+                    onChange={(e) =>
+                      setForm({ ...form, phone: e.target.value.replace(/\D/g, "") })
+                    }
+                  />
+                  {errors.phone && <p className="text-red-600 text-sm">{errors.phone}</p>}
 
-              <input
-                className="w-full border p-2 rounded"
-                placeholder="Email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-              {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
+                  <button className="w-full bg-purple-700 text-white py-2 rounded">
+                    Submit
+                  </button>
 
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="w-full bg-gray-200 py-2 rounded"
+                  >
+                    Close
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="text-center">
+                <h2 className="text-xl font-bold mb-3">Thank You </h2>
+                <p className="text-gray-700">{actionText}</p>
 
-              <input
-                className="w-full border p-2 rounded"
-                placeholder="Phone"
-                value={form.phone}
-                maxLength={10}
-                onChange={(e) =>
-                  setForm({ ...form, phone: e.target.value.replace(/\D/g, "") })
-                }
-              />
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="mt-4 w-full bg-gray-200 py-2 rounded"
+                >
+                  Close
+                </button>
+              </div>
+            )}
 
-              {errors.phone && <p className="text-red-600 text-sm">{errors.phone}</p>}
-
-              <button className="w-full bg-purple-700 text-white py-2 rounded">
-                Submit
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="w-full bg-gray-200 py-2 rounded"
-              >
-                Close
-              </button>
-            </form>
           </div>
         </div>
       )}
