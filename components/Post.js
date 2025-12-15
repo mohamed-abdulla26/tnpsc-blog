@@ -1,114 +1,20 @@
-// "use client";
-// import Link from "next/link";
-// import { useState, useEffect } from "react";
-
-// export default function Post({ post, posts = [] }) {
-//   const [mainImage, setMainImage] = useState(
-//     post?.image ? `/images/${post.image}` : "/images/default.jpg"
-//   );
-
-//   // Check main image validity
-//   useEffect(() => {
-//     fetch(mainImage).then((res) => {
-//       if (!res.ok) setMainImage("/images/default.jpg");
-//     });
-//   }, [mainImage]);
-
-//   const getImage = (img) => {
-//     if (!img || img.trim() === "") return "/images/default.jpg";
-//     return `/images/${img.replace(/\s/g, "-")}`;
-//   };
-
-//   return (
-//     <main className="min-h-screen bg-white text-black">
-//       {/* HEADER */}
-//       <header className="w-full bg-white border-b">
-//         <div className="container mx-auto px-4 py-2 flex items-center justify-between">
-//           <a href="/" className="text-xl font-bold">
-//             ALL POSTS
-//           </a>
-//         </div>
-//       </header>
-
-//       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 container mx-auto px-4 py-10">
-//         {/* LEFT SIDE — POST CONTENT */}
-//         <div className="lg:col-span-2">
-//           <h2 className="text-4xl font-bold mb-4">{post.title}</h2>
-//           <p className="text-gray-600 mb-4">
-//             Published on {post.created_at_formatted}
-//           </p>
-
-//           <img
-//             src={mainImage}
-//             alt={post.title}
-//             className="rounded-lg shadow mb-6 w-full h-auto"
-//             onError={(e) => (e.currentTarget.src = "/images/default.jpg")}
-//           />
-
-
- 
-//           <div
-//             className="prose prose-lg max-w-none"
-//             dangerouslySetInnerHTML={{ __html: post.description }}
-//           ></div>
-
-//  </div>
-
-//         {/* RIGHT SIDEBAR */}
-//         <aside className="space-y-8">
-//           <div className="bg-white rounded-xl shadow p-6">
-//             <h3 className="text-xl font-bold mb-4">Latest Posts</h3>
-//             <div className="space-y-4">
-//               {posts.slice(0, 4).map((p) => (
-//                 <Link key={p._id} href={"/post/" + p._id}>
-//                   <div className="flex gap-3 hover:opacity-80">
-//                     <img
-//                       src={getImage(p.image)}
-//                       alt={p.title}
-//                       className="rounded-md w-20 h-16 object-cover"
-//                       onError={(e) => (e.currentTarget.src = "/images/default.jpg")}
-//                     />
-//                     <p className="text-sm font-medium">{p.title}</p>
-//                   </div>
-//                 </Link>
-//               ))}
-//             </div>
-//           </div>
-
-//           <div className="bg-white rounded-xl shadow p-6">
-//             <h3 className="text-xl font-bold mb-4">NEXTJS</h3>
-//             <ul className="space-y-2 text-gray-700">
-//               <li>• Flexible Rendering Options</li>
-//               <li>• Built-in Performance Optimizations</li>
-//               <li>• Enhanced Developer Experience</li>
-//               <li>• SEO Friendliness</li>
-//               <li>• Scalability and Integration</li>
-//             </ul>
-//           </div>
-//         </aside>
-//       </div>
-//     </main>
-//   );
-// }
-
-
 
 
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-export default function Post({ post, posts = [] }) {
+export default function Post({ post, relatedPosts = [] }) {
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", phone: "" });
+  const [errors, setErrors] = useState({});
+
+
   const [mainImage, setMainImage] = useState(
     post?.image ? `/images/${post.image}` : "/images/default.jpg"
   );
 
-  // Modal state
-  const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "" });
-  const [submitMsg, setSubmitMsg] = useState("");
-
-  // Check main image validity
+  /* ✅ IMAGE FALLBACK CHECK */
   useEffect(() => {
     fetch(mainImage).then((res) => {
       if (!res.ok) setMainImage("/images/default.jpg");
@@ -120,82 +26,180 @@ export default function Post({ post, posts = [] }) {
     return `/images/${img.replace(/\s/g, "-")}`;
   };
 
+  /* FORM VALIDATION */
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const phoneRegex = /^[6-9]\d{9}$/;
+
+  const validateForm = () => {
+    let err = {};
+
+    // Name
+    if (!form.name.trim()) {
+      err.name = "Name is required";
+    }
+
+    // Email
+    if (!form.email.trim()) {
+      err.email = "Email is required";
+    } else if (!emailRegex.test(form.email)) {
+      err.email = "Enter valid email";
+    }
+
+    // Phone
+    if (!form.phone.trim()) {
+      err.phone = "Phone number is required";
+    } else if (!phoneRegex.test(form.phone)) {
+      err.phone = "Enter valid 10-digit number";
+    }
+
+    setErrors(err);
+    return Object.keys(err).length === 0;
+  };
+
+
+
   const handleCtaSubmit = async (e) => {
-  e.preventDefault();
-  setSubmitMsg("Submitting...");
+    e.preventDefault();
 
-  // Save enquiry
-  const res = await fetch("/api/enquiry", {
-    method: "POST",
-    body: JSON.stringify(form),
-    headers: { "Content-Type": "application/json" }
-  });
+    if (!validateForm()) return;
 
-  const result = await res.json();
-  setSubmitMsg(result.message);
 
-  // Execute CTA Action
-  const { actionType, actionValue } = post.cta;
 
-  setTimeout(() => {
-    if (actionType === "text") alert(actionValue);
-    if (actionType === "url") window.open(actionValue, "_blank");
-    if (actionType === "download") window.open(actionValue, "_blank");
-    if (actionType === "call") window.location.href = `tel:${actionValue}`;
-  }, 800);
-};
+    try {
+      // 2️⃣ Save enquiry FIRST
+      const res = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          postId: post._id,
+        }),
+      });
 
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert("Enquiry submit failed");
+        return;
+      }
+
+      // 3️⃣ NOW run CTA action
+      const { actionType, actionValue } = post.cta;
+
+      if (actionType === "text") {
+        alert(actionValue);
+      }
+
+      if (actionType === "url") {
+        window.open(actionValue, "_blank");
+      }
+
+      // 4️⃣ Reset + close modal
+      setForm({ name: "", email: "", phone: "" });
+      setShowModal(false);
+
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong");
+    }
+  };
 
 
   return (
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-gray-50 text-black">
+
+
+
       {/* HEADER */}
-      <header className="w-full bg-white border-b">
-        <div className="container mx-auto px-4 py-2 flex items-center justify-between">
-          <a href="/" className="text-xl font-bold">
-            ALL POSTS
-          </a>
+      <header className="bg-white border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+
+          {/* LEFT: Back */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-black"
+          >
+            ← All Posts
+          </Link>
+
+
+          {/* RIGHT: EMPTY (for balance) */}
+          <div className="w-[80px]" />
+
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 container mx-auto px-4 py-10">
-        {/* LEFT SIDE — POST CONTENT */}
-        <div className="lg:col-span-2">
-          <h2 className="text-4xl font-bold mb-4">{post.title}</h2>
-          <p className="text-gray-600 mb-4">
-            Published on {post.created_at_formatted}
+
+        {/* LEFT CONTENT */}
+        <article className="lg:col-span-2 bg-white p-6 rounded-xl shadow">
+          <h1 className="text-3xl font-bold mb-2">
+            {post.h1 || post.title}
+          </h1>
+
+
+
+          <p className="text-gray-500 mb-4">
+            Published on{" "}
+            {new Date(post.created_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </p>
 
+
+          {/* IMAGE */}
           <img
             src={mainImage}
             alt={post.title}
-            className="rounded-lg shadow mb-6 w-full h-auto"
+            className="w-full h-80 object-cover rounded-xl mb-6"
             onError={(e) => (e.currentTarget.src = "/images/default.jpg")}
           />
 
-          <button>{post.cta.text}</button>
+          {/* CTA BELOW IMAGE */}
+          {post.cta && (
+            <div className="my-6 text-center">
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-6 py-3 bg-purple-700 text-white rounded-lg font-medium hover:bg-purple-800"
+              >
+                {post.cta.text}
+              </button>
+            </div>
+          )}
 
-
-           
+          {/* CONTENT */}
           <div
-            className="prose prose-lg max-w-none"
+            className="prose max-w-none"
             dangerouslySetInnerHTML={{ __html: post.description }}
-          ></div>
+          />
 
-          {/* CTA BUTTON #2 */}
-          <button>{post.cta.text}</button>
-
-
-  </div>
-
+          {/* CTA END OF CONTENT */}
+          {post.cta && (
+            <div className="my-8 text-center">
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-6 py-3 bg-purple-700 text-white rounded-lg font-medium hover:bg-purple-800"
+              >
+                {post.cta.text}
+              </button>
+            </div>
+          )}
+        </article>
         {/* RIGHT SIDEBAR */}
         <aside className="space-y-8">
+
+          {/* LATEST POSTS */}
           <div className="bg-white rounded-xl shadow p-6">
             <h3 className="text-xl font-bold mb-4">Latest Posts</h3>
+
             <div className="space-y-4">
-              {posts.slice(0, 4).map((p) => (
+              {relatedPosts.slice(0, 4).map((p) => (
                 <Link key={p._id} href={"/post/" + p._id}>
-                  <div className="flex gap-3 hover:opacity-80">
+                  <div className="flex gap-3 hover:opacity-80 cursor-pointer">
                     <img
                       src={getImage(p.image)}
                       alt={p.title}
@@ -204,64 +208,77 @@ export default function Post({ post, posts = [] }) {
                         (e.currentTarget.src = "/images/default.jpg")
                       }
                     />
+
                     <p className="text-sm font-medium">{p.title}</p>
                   </div>
                 </Link>
               ))}
             </div>
           </div>
+
+          {/* NEXTJS BOX (ADD HERE) */}
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-xl font-bold mb-4">NEXTJS</h3>
+            <ul className="space-y-2 text-gray-700 text-sm">
+              <li>• Flexible Rendering Options</li>
+              <li>• Built-in Performance Optimizations</li>
+              <li>• Enhanced Developer Experience</li>
+              <li>• SEO Friendliness</li>
+              <li>• Scalability and Integration</li>
+            </ul>
+          </div>
+
         </aside>
+
+
       </div>
 
-      {/* MODAL */}
+      {/* CTA MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-            <h3 className="text-lg font-bold mb-4">{post.cta.text}</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">{post.cta.text}</h2>
 
             <form onSubmit={handleCtaSubmit} className="space-y-4">
+
+
               <input
-                type="text"
+                className="w-full border p-2 rounded"
                 placeholder="Name"
-                className="w-full p-3 border rounded"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
               />
+              {errors.name && <p className="text-red-600 text-sm">{errors.name}</p>}
 
               <input
-                type="email"
+                className="w-full border p-2 rounded"
                 placeholder="Email"
-                className="w-full p-3 border rounded"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
               />
+              {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
+
 
               <input
-                type="text"
+                className="w-full border p-2 rounded"
                 placeholder="Phone"
-                className="w-full p-3 border rounded"
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                required
+                maxLength={10}
+                onChange={(e) =>
+                  setForm({ ...form, phone: e.target.value.replace(/\D/g, "") })
+                }
               />
 
-              {submitMsg && (
-                <p className="text-center text-purple-700">{submitMsg}</p>
-              )}
+              {errors.phone && <p className="text-red-600 text-sm">{errors.phone}</p>}
 
-              <button
-                type="submit"
-                className="w-full py-3 bg-purple-700 text-white rounded-lg hover:bg-purple-800"
-              >
+              <button className="w-full bg-purple-700 text-white py-2 rounded">
                 Submit
               </button>
 
               <button
-                onClick={() => setShowModal(false)}
                 type="button"
-                className="w-full py-2 mt-2 bg-gray-300 rounded-lg"
+                onClick={() => setShowModal(false)}
+                className="w-full bg-gray-200 py-2 rounded"
               >
                 Close
               </button>

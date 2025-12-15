@@ -1,94 +1,19 @@
-// import { Schema, model, models } from "mongoose"; 
-
-
-
-// const postSchema =  new Schema({
-//     title: String,
-//     description: String,
-//     image: String,
-
-
-    
-    
-//     created_at:{
-//         type: Date,
-//         default: Date.now
-//     }
-// }, { toJSON: { virtuals: true} });
-
-// postSchema.virtual('short_description').get(function() {
-//     return this.description.substr(0,100)+'...'
-// });
-// postSchema.virtual('created_at_formatted').get(function() {
-//     return changeDateFormat(this.created_at)
-
-// });
-
-// function changeDateFormat(date_str) {
-//     const date = new Date(date_str);
-//     const months = ["January", "February", "March", "April", "May", "June",
-//     "July", "August", "September", "October", "November", "December"
-//     ];
-
-//     return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
-// }
-
-
-// const PostModel = models.Post || model('Post', postSchema);
-
-// export default PostModel;
-
-
-
-
-
 
 
 import { Schema, model, models } from "mongoose";
 
 const postSchema = new Schema(
   {
-    title: String,
-    description: String,
-    image: String,
+    title: { type: String, required: true },          // SEO title
+    h1: { type: String , maxlength: 90},                              // Page H1
+    metaDescription: { type: String, maxlength: 180 },// SEO meta description
 
-    cta: {
-      type: Schema.Types.ObjectId,
-      ref: "Cta",
-    },
-
-    created_at: {
-      type: Date,
-      default: Date.now,
-    }
+    description: { type: String, required: true },
+    image: { type: String, default: "default.jpg" },
+    cta: { type: Schema.Types.ObjectId, ref: "Cta" },
+    created_at: { type: Date, default: Date.now }
   },
   { toJSON: { virtuals: true } }
 );
 
-postSchema.virtual("short_description").get(function () {
-  return this.description?.substring(0, 100) + "...";
-});
-
-postSchema.virtual("created_at_formatted").get(function () {
-  const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-  const d = this.created_at;
-  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-});
-
-const PostModel = models.Post || model("Post", postSchema);
-export default PostModel;
-
-
-
-
-
-
-
-
-
-
-
-
+export default models.Post || model("Post", postSchema);

@@ -25,3 +25,10 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* Make images responsive (mobile safe) */
+img {
+  max-width: auto;
+  height: 100%;
+}
+

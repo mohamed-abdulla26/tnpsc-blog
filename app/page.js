@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 
+
+
 export default function Home() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
@@ -20,7 +22,7 @@ export default function Home() {
   const fetchPosts = async (page = 1, query = "") => {
     setLoading(true);
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/posts?page=${page}&limit=10&q=${query}`
+      `${process.env.NEXT_PUBLIC_API_URL}/posts?page=${page}&limit=7&q=${query}`
     );
     const data = await res.json();
     setPosts(data.posts || []);
@@ -48,7 +50,7 @@ export default function Home() {
     <div className="bg-gray-50 min-h-screen text-gray-900">
       {/* HEADER */}
       <header className="w-full shadow bg-white py-4 px-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My Blog</h1>
+        <h1 className="text-2xl font-bold">Blog</h1>
         <div className="flex gap-4">
           <input
             onKeyDown={searchPost}
@@ -121,20 +123,76 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* PAGINATION */}
-              <div className="flex justify-center gap-3 mt-8">
-                {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => handlePageChange(p)}
-                    className={`px-4 py-2 rounded-md ${
-                      p === page ? "bg-purple-600 text-white" : "bg-gray-200"
+
+
+
+              {/* PAGINATION (FIGMA STYLE) */}
+              <div className="flex justify-center items-center gap-2 mt-10 text-sm">
+
+                {/* PREVIOUS */}
+                <button
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 1}
+                  className={`px-3 py-2 rounded border transition
+      ${page === 1
+                      ? "text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "text-gray-700 border-gray-300 hover:bg-gray-100"
                     }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+                >
+                  ‹ Previous
+                </button>
+
+                {/* PAGE NUMBERS */}
+                {Array.from({ length: pages }, (_, i) => i + 1).map((p) => {
+                  // show only nearby pages like figma
+                  if (
+                    p === 1 ||
+                    p === pages ||
+                    (p >= page - 1 && p <= page + 1)
+                  ) {
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => handlePageChange(p)}
+                        className={`px-3 py-2 rounded border transition
+            ${p === page
+                            ? "border-purple-600 text-purple-600 font-medium"
+                            : "border-gray-300 text-gray-700 hover:bg-gray-100"
+                          }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  }
+
+                  // dots
+                  if (p === page - 2 || p === page + 2) {
+                    return (
+                      <span key={p} className="px-2 text-gray-400">
+                        …
+                      </span>
+                    );
+                  }
+
+                  return null;
+                })}
+
+                {/* NEXT */}
+                <button
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page === pages}
+                  className={`px-3 py-2 rounded border transition
+      ${page === pages
+                      ? "text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "text-gray-700 border-gray-300 hover:bg-gray-100"
+                    }`}
+                >
+                  Next ›
+                </button>
+
               </div>
+
+
             </>
           ) : (
             <p className="text-red-600 font-medium">
