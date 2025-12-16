@@ -7,8 +7,8 @@ export default function Header() {
     <h1 className="text-4xl">TNPSC Info</h1>
 
     <nav className="flex items-center space-x-6">
-      <Link href="/add-post" className="hover:text-blue-500">Add Blog</Link>
-      <Link href="/cta-form" className="hover:text-blue-500">Create Blog Action</Link>
+      {/* <Link href="/add-post" className="hover:text-blue-500">Add Blog</Link>
+      <Link href="/cta-form" className="hover:text-blue-500">Create Blog Action</Link> */}
     </nav>
   
 </header>

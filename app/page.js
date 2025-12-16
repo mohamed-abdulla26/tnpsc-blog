@@ -49,24 +49,35 @@ export default function Home() {
   return (
     <div className="bg-gray-50 min-h-screen text-gray-900">
       {/* HEADER */}
-      <header className="w-full shadow bg-white py-4 px-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Blog</h1>
-        <div className="flex gap-4">
-          <input
-            onKeyDown={searchPost}
-            ref={inputRef}
-            type="text"
-            placeholder="Search…"
-            className="px-4 py-2 border border-gray-300 rounded-md text-black"
-          />
-          <button
-            onClick={searchPost}
-            className="px-4 py-2 bg-purple-600 text-white rounded-md"
-          >
-            Search
-          </button>
-        </div>
-      </header>
+      <header className="w-full shadow bg-white py-4 px-4 md:px-8">
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+    {/* LOGO */}
+    <h1 className="text-2xl font-bold text-center md:text-left">
+      Blog
+    </h1>
+
+    {/* SEARCH */}
+    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+      <input
+        ref={inputRef}
+        onKeyDown={searchPost}
+        type="text"
+        placeholder="Search…"
+        className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md text-black"
+      />
+
+      <button
+        onClick={searchPost}
+        className="w-full sm:w-auto px-4 py-2 bg-purple-600 text-white rounded-md"
+      >
+        Search
+      </button>
+    </div>
+
+  </div>
+</header>
+
 
       {/* MAIN CONTENT */}
       <main className="grid grid-cols-1 lg:grid-cols-3 gap-10 p-8 max-w-7xl mx-auto mt-8">
@@ -77,12 +88,13 @@ export default function Home() {
           ) : posts.length > 0 ? (
             <>
               {/* FEATURED POST */}
-              <div className="bg-white rounded-xl shadow overflow-hidden">
+              <div className="relative w-full aspect-video overflow-hidden rounded-xl mb-6">
                 <img
                   src={getImage(posts[0].image)}
                   onError={(e) => (e.currentTarget.src = "/images/default.jpg")}
                   alt={posts[0].title}
-                  className="w-full h-[380px] object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
+
                 />
                 <div className="p-6">
                   <h1 className="text-3xl font-bold mb-3">{posts[0].title}</h1>

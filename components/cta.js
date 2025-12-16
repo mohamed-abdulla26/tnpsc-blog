@@ -1,51 +1,8 @@
-// "use client";
-// import { useState } from "react";
-
-// export default function CtaForm() {
-//   const [text, setText] = useState("");
-//   const [actionType, setActionType] = useState("text");
-//   const [actionValue, setActionValue] = useState("");
-//   const [msg, setMsg] = useState("");
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     const res = await fetch("/api/cta/create", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ text, actionType, actionValue }),
-//     });
-
-//     const data = await res.json();
-//     setMsg(data.message);
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit} className="p-4 border rounded">
-//       <h2 className="text-xl font-bold">Create CTA</h2>
-
-//       <label>CTA Text</label>
-//       <input value={text} onChange={(e) => setText(e.target.value)} className="border p-1 w-full" required />
-
-//       <label>Action Type</label>
-//       <select value={actionType} onChange={(e) => setActionType(e.target.value)} className="border p-1 w-full">
-//         <option value="text">Text</option>
-//         <option value="url">URL</option>
-//       </select>
-
-//       <label>Action Value</label>
-//       <input value={actionValue} onChange={(e) => setActionValue(e.target.value)} className="border p-1 w-full" required />
-
-//       <button className="bg-blue-600 text-white px-3 py-1 mt-3 rounded">Submit</button>
-
-//       {msg && <p className="mt-2 text-green-600">{msg}</p>}
-//     </form>
-//   );
-// }
 
 
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Editor from "@/components/Editor";
 
 export default function CtaForm() {
   const [text, setText] = useState("");
@@ -53,8 +10,29 @@ export default function CtaForm() {
   const [actionValue, setActionValue] = useState("");
   const [msg, setMsg] = useState("");
 
+
+  useEffect(() => {
+    setActionValue("");
+  }, [actionType]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation
+    if (!text.trim()) {
+      setMsg("CTA Button Text is required");
+      return;
+    }
+
+    if (actionType === "text" && !actionValue.trim()) {
+      setMsg("Please enter a message for the CTA");
+      return;
+    }
+
+    if (actionType === "url" && !/^https?:\/\/.+/.test(actionValue)) {
+      setMsg("Please enter a valid URL starting with http:// or https://");
+      return;
+    }
 
     const res = await fetch("/api/cta/create", {
       method: "POST",
@@ -67,6 +45,7 @@ export default function CtaForm() {
     setText("");
     setActionValue("");
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -110,24 +89,42 @@ export default function CtaForm() {
           </select>
         </div>
 
+
+
+
+
+
         {/* ACTION VALUE */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {actionType === "url" ? "Redirect URL" : "Popup Message"}
-          </label>
-          <input
-            value={actionValue}
-            onChange={(e) => setActionValue(e.target.value)}
-            placeholder={
-              actionType === "url"
-                ? "https://example.com"
-                : "Thank you for contacting us"
-            }
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 
-                       focus:ring-2 focus:ring-purple-600 focus:outline-none"
-            required
-          />
-        </div>
+        {actionType === "text" && (
+          <div>
+            <label className="block mb-1 font-medium">
+              CTA Message (Rich Text)
+            </label>
+
+            <Editor
+              value={actionValue}
+              onChange={setActionValue}
+            />
+          </div>
+        )}
+
+        {/* ACTION VALUE — URL */}
+        {actionType === "url" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Redirect URL
+            </label>
+            <input
+              type="url"
+              value={actionValue}
+              onChange={(e) => setActionValue(e.target.value)}
+              placeholder="https://example.com"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 
+                 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+              required
+            />
+          </div>
+        )}
 
         {/* SUBMIT */}
         <button

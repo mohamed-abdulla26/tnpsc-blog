@@ -115,7 +115,7 @@ export default function Post({ post, relatedPosts = [] }) {
 
       {/* HEADER */}
       <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
 
           {/* LEFT: Back */}
           <Link
@@ -156,7 +156,9 @@ export default function Post({ post, relatedPosts = [] }) {
           <img
             src={mainImage}
             alt={post.title}
-            className="w-full h-80 object-cover rounded-xl mb-6"
+            // className="w-full h-80 object-cover rounded-xl mb-6"
+            className="w-full h-56 sm:h-72 lg:h-80 object-cover rounded-xl mb-6"
+
             onError={(e) => (e.currentTarget.src = "/images/default.jpg")}
           />
 
@@ -174,7 +176,9 @@ export default function Post({ post, relatedPosts = [] }) {
                   setErrors({}); // ✅
                 }}
                 className="px-6 py-3 bg-purple-700 text-white rounded-lg font-medium hover:bg-purple-800"
+
               >
+
                 {post.cta.text}
               </button>
 
@@ -254,30 +258,38 @@ export default function Post({ post, relatedPosts = [] }) {
       {/* CTA MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow w-full max-w-md">
+          {/* <div className="bg-white p-6 rounded-xl shadow w-full max-w-md"> */}
+          <div className="bg-white p-5 sm:p-6 rounded-xl shadow w-[95%] max-w-md">
+
             {!submitted ? (
               <>
                 <h2 className="text-xl font-bold mb-4">{post.cta.text}</h2>
 
                 <form onSubmit={handleCtaSubmit} className="space-y-4">
-                  <input
-                    className="w-full border p-2 rounded"
+                  {/* <input
+                    className="w-full border p-2 rounded" */}
+                  <input className="w-full border px-3 py-2 rounded text-base"
+
                     placeholder="Name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
                   {errors.name && <p className="text-red-600 text-sm">{errors.name}</p>}
 
-                  <input
-                    className="w-full border p-2 rounded"
+                  {/* <input
+                    className="w-full border p-2 rounded" */}
+                  <input className="w-full border px-3 py-2 rounded text-base"
+
                     placeholder="Email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                   />
                   {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
 
-                  <input
-                    className="w-full border p-2 rounded"
+                  {/* <input
+                    className="w-full border p-2 rounded" */}
+                  <input className="w-full border px-3 py-2 rounded text-base"
+
                     placeholder="Phone"
                     value={form.phone}
                     maxLength={10}
@@ -303,7 +315,12 @@ export default function Post({ post, relatedPosts = [] }) {
             ) : (
               <div className="text-center">
                 <h2 className="text-xl font-bold mb-3">Thank You </h2>
-                <p className="text-gray-700">{actionText}</p>
+                {/* <p className="text-gray-700">{actionText}</p> */}
+                <div
+                  className="prose max-w-none text-left"
+                  dangerouslySetInnerHTML={{ __html: actionText }}
+                />
+
 
                 <button
                   onClick={() => setShowModal(false)}
